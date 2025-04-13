@@ -1,5 +1,8 @@
 package com.rithvikreddy.linkedInProject.postsService.service;
 
+import com.rithvikreddy.linkedInProject.postsService.auth.AuthContextHolder;
+import com.rithvikreddy.linkedInProject.postsService.client.ConnectionsServiceClient;
+import com.rithvikreddy.linkedInProject.postsService.dto.PersonDto;
 import com.rithvikreddy.linkedInProject.postsService.dto.PostCreateRequestDto;
 import com.rithvikreddy.linkedInProject.postsService.dto.PostDto;
 import com.rithvikreddy.linkedInProject.postsService.entity.Post;
@@ -20,6 +23,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final ModelMapper modelMapper;
+    private final ConnectionsServiceClient connectionsServiceClient;
 
     public PostDto createPost(PostCreateRequestDto postCreateRequestDto, Long userId) {
         log.info("Creating post for user with id: {}",userId);
@@ -31,6 +35,10 @@ public class PostService {
 
     public PostDto getPostById(Long postId) {
         log.info("getting the post by id: {}",postId);
+
+        Long userId = AuthContextHolder.getCurrentUserId();
+        List<PersonDto> personDtoList = connectionsServiceClient.getFirstDegreeConnections(userId);
+
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new ResourceNotFoundException("Resource not found with postId: "+postId)
         );
